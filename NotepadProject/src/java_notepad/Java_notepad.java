@@ -1,14 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package java_notepad;
 
-/**
- *
- * @author KHALID
- */
-public class Java_notepad {
-    
+import javax.swing.JFrame;
+
+
+public class Java_notepad extends JFrame{
+    public static void main(String[] args) {
+        
+    }
 }
