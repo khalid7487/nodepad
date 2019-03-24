@@ -7,6 +7,11 @@ import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.StringTokenizer;
 import javax.swing.*;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 public class Java_notepad extends JFrame {
 
@@ -18,6 +23,9 @@ public class Java_notepad extends JFrame {
     String fileName;
     JFileChooser jc;
     String fileContent;
+    UndoManager undo;
+    UndoAction undoAction;
+    RedoAction redoAction;
 
     public Java_notepad() {
         initComponent();
@@ -51,7 +59,7 @@ public class Java_notepad extends JFrame {
                 System.exit(0);
             }
         });
-        
+
         itmCut.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -70,11 +78,24 @@ public class Java_notepad extends JFrame {
                 mainarea.paste();
             }
         });
+        mainarea.getDocument().addUndoableEditListener(new UndoableEditListener() {
+            @Override
+            public void undoableEditHappened(UndoableEditEvent e) {
+                undo.addEdit(e.getEdit());
+                undoAction.update();
+                redoAction.update();
+            }
+        });
     }
 
     private void initComponent() {
         jc = new JFileChooser(".");
         mainarea = new JTextArea();
+        undo = new UndoManager();
+        ImageIcon undoIcon = new ImageIcon(getClass().getResource("/img/Undo.png"));
+        ImageIcon redoIcon = new ImageIcon(getClass().getResource("/img/Redo.png"));
+        undoAction = new UndoAction(undoIcon);
+        redoAction = new RedoAction(redoIcon);
         getContentPane().add(mainarea);
         getContentPane().add(new JScrollPane(mainarea), BorderLayout.CENTER);
         setTitle("Untitled NotePad");
@@ -109,10 +130,10 @@ public class Java_notepad extends JFrame {
         itemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         itemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-        itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,ActionEvent.CTRL_MASK));
-        itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,ActionEvent.CTRL_MASK));
-        itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,ActionEvent.CTRL_MASK));
-        
+        itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+        itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
+        itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
+
         //add menu item
         mnuFile.add(itemNew);
         mnuFile.add(itemOpen);
@@ -120,9 +141,12 @@ public class Java_notepad extends JFrame {
         mnuFile.add(itmSaveas);
         mnuFile.addSeparator();
         mnuFile.add(itmExit);
+        mnuEdit.add(undoAction);
+        mnuEdit.add(redoAction);
         mnuEdit.add(itmCopy);
         mnuEdit.add(itmCut);
         mnuEdit.add(itmPaste);
+        
         //add menu item to menu bar
         mbar.add(mnuFile);
         mbar.add(mnuEdit);
@@ -239,6 +263,66 @@ public class Java_notepad extends JFrame {
         setTitle("Untitled Notepad");
         fileName = null;
         fileContent = null;
+    }
+
+    class UndoAction extends AbstractAction {
+
+        public UndoAction(ImageIcon undoIcon) {
+            super("Undo", undoIcon);
+            setEnabled(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                undo.undo();
+            } catch (CannotUndoException ex) {
+                ex.printStackTrace();
+            }
+            update();
+            redoAction.update();
+        }
+
+        protected void update() {
+            if (undo.canUndo()) {
+                setEnabled(true);
+                putValue(Action.NAME, "Undo");
+            }else{
+                setEnabled(false);
+                putValue(Action.NAME, "Undo");
+            }
+        }
+
+    }
+
+    class RedoAction extends AbstractAction {
+
+        public RedoAction(ImageIcon redoIcon) {
+            super("Redo", redoIcon);
+            setEnabled(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                undo.redo();
+            } catch (CannotRedoException ex) {
+                ex.printStackTrace();
+            }
+            update();
+             undoAction.update();
+        }
+
+        protected void update() {
+            if (undo.canRedo()) {
+                setEnabled(true);
+                putValue(Action.NAME, "Redo");
+            }else{
+                setEnabled(false);
+                putValue(Action.NAME, "Redo");
+            }
+        }
+
     }
 
     public static void main(String[] args) {
