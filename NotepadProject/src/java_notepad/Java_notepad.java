@@ -13,9 +13,11 @@ public class Java_notepad extends JFrame {
     JTextArea mainarea;
     JMenuBar mbar;
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
-    JMenuItem itemNew, itemOpen, itemSave, itmSaveas, itmExit;
+    JMenuItem itemNew, itemOpen, itemSave, itmSaveas,
+            itmExit, itmCopy, itmCut, itmPaste;
     String fileName;
     JFileChooser jc;
+    String fileContent;
 
     public Java_notepad() {
         initComponent();
@@ -35,6 +37,37 @@ public class Java_notepad extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 open();
+            }
+        });
+        itemNew.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                open_new();
+            }
+        });
+        itmExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        
+        itmCut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainarea.cut();
+            }
+        });
+        itmCopy.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainarea.copy();
+            }
+        });
+        itmPaste.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainarea.paste();
             }
         });
     }
@@ -58,22 +91,38 @@ public class Java_notepad extends JFrame {
         ImageIcon openIcon = new ImageIcon(getClass().getResource("/img/open.png"));
         ImageIcon saveIcon = new ImageIcon(getClass().getResource("/img/Save.png"));
         ImageIcon saveAsIcon = new ImageIcon(getClass().getResource("/img/Saveas.png"));
+        ImageIcon exitIcon = new ImageIcon(getClass().getResource("/img/exit.png"));
+        ImageIcon copyIcon = new ImageIcon(getClass().getResource("/img/copy.png"));
+        ImageIcon cutIcon = new ImageIcon(getClass().getResource("/img/cut.png"));
+        ImageIcon pasteIcon = new ImageIcon(getClass().getResource("/img/past.png"));
 
         //menuitem
         itemNew = new JMenuItem("New", newIcon);
         itemOpen = new JMenuItem("Open", openIcon);
         itemSave = new JMenuItem("Save", saveIcon);
         itmSaveas = new JMenuItem("Save As", saveAsIcon);
+        itmExit = new JMenuItem("Exit", exitIcon);
+        itmCopy = new JMenuItem("Copy", copyIcon);
+        itmCut = new JMenuItem("Cut", cutIcon);
+        itmPaste = new JMenuItem("Paste", pasteIcon);
         //adding shortcut
         itemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         itemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-
+        itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,ActionEvent.CTRL_MASK));
+        itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,ActionEvent.CTRL_MASK));
+        itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,ActionEvent.CTRL_MASK));
+        
         //add menu item
         mnuFile.add(itemNew);
         mnuFile.add(itemOpen);
         mnuFile.add(itemSave);
         mnuFile.add(itmSaveas);
+        mnuFile.addSeparator();
+        mnuFile.add(itmExit);
+        mnuEdit.add(itmCopy);
+        mnuEdit.add(itmCut);
+        mnuEdit.add(itmPaste);
         //add menu item to menu bar
         mbar.add(mnuFile);
         mbar.add(mnuEdit);
@@ -98,13 +147,17 @@ public class Java_notepad extends JFrame {
                 while (st.hasMoreElements()) {
                     fout.println(st.nextToken());
                 }
-                 fout.close();
+
                 JOptionPane.showMessageDialog(rootPane, "File saved");
+                fileContent = mainarea.getText();
             }
 
         } catch (IOException e) {
         } finally {
-           
+            if (fout != null) {
+                fout.close();
+            }
+
         }
     }
 
@@ -123,6 +176,7 @@ public class Java_notepad extends JFrame {
                 fout.println(st.nextToken());
             }
             JOptionPane.showMessageDialog(rootPane, "File saved");
+            fileContent = mainarea.getText();
             fileName = jc.getSelectedFile().getName();
             setTitle(fileName = jc.getSelectedFile().getName());
 
@@ -151,6 +205,40 @@ public class Java_notepad extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void open_new() {
+        if (!mainarea.getText().equals("") && !mainarea.getText().equals(fileContent)) {
+            if (fileName == null) {
+                int option = JOptionPane.showConfirmDialog(rootPane, "Do you Want o save the changes?");
+                if (option == 0) {
+                    saveAs();
+                    clear();
+                } else if (option == 2) {
+                } else {
+                    clear();
+                }
+            } else {
+                int option = JOptionPane.showConfirmDialog(rootPane, "Do you Want o save the changes?");
+                if (option == 0) {
+                    save();
+                    clear();
+                } else if (option == 2) {
+                } else {
+                    clear();
+                }
+            }
+        } else {
+            clear();
+        }
+
+    }
+
+    private void clear() {
+        mainarea.setText(null);
+        setTitle("Untitled Notepad");
+        fileName = null;
+        fileContent = null;
     }
 
     public static void main(String[] args) {
