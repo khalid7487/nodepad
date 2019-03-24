@@ -1,14 +1,16 @@
 package java_notepad;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 
 public class Java_notepad extends JFrame {
 
     JTextArea mainarea;
     JMenuBar mbar;
-    JMenu mnuFile,mnuEdit,mnuFormat,mnuHelp;
-    JMenuItem itemNew,itemOpen,itemSave;
+    JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
+    JMenuItem itemNew, itemOpen, itemSave;
 
     public Java_notepad() {
         initComponent();
@@ -17,20 +19,30 @@ public class Java_notepad extends JFrame {
     private void initComponent() {
         mainarea = new JTextArea();
         getContentPane().add(mainarea);
-        getContentPane().add(new JScrollPane(mainarea),BorderLayout.CENTER);
+        getContentPane().add(new JScrollPane(mainarea), BorderLayout.CENTER);
         setTitle("Untitled NotePad");
-        setSize(800,600);
+        setSize(800, 600);
         //menubar
-        mbar=new JMenuBar();
+        mbar = new JMenuBar();
         //menu
-        mnuFile=new JMenu("File");
-        mnuEdit=new JMenu("Edit");
-        mnuFormat=new JMenu("Format");
-        mnuHelp=new JMenu("Help");
+        mnuFile = new JMenu("File");
+        mnuEdit = new JMenu("Edit");
+        mnuFormat = new JMenu("Format");
+        mnuHelp = new JMenu("Help");
+        //ad icon  to menu item
+        ImageIcon newIcon = new ImageIcon(getClass().getResource("/img/new.png"));
+        ImageIcon openIcon = new ImageIcon(getClass().getResource("/img/open.png"));
+        ImageIcon saveIcon = new ImageIcon(getClass().getResource("/img/Save.png"));
+
         //menuitem
-        itemNew=new JMenuItem("New");
-        itemOpen=new JMenuItem("Open");
-        itemSave=new JMenuItem("Save");
+        itemNew = new JMenuItem("New", newIcon);
+        itemOpen = new JMenuItem("Open", openIcon);
+        itemSave = new JMenuItem("Save", saveIcon);
+        //adding shortcut
+        itemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,ActionEvent.CTRL_MASK));
+        itemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,ActionEvent.CTRL_MASK));
+        itemSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,ActionEvent.CTRL_MASK));
+        
         //add menu item
         mnuFile.add(itemNew);
         mnuFile.add(itemOpen);
@@ -42,13 +54,12 @@ public class Java_notepad extends JFrame {
         mbar.add(mnuHelp);
         //add menubar to frame
         setJMenuBar(mbar);
-        
-        
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
 
     public static void main(String[] args) {
-       Java_notepad jn=new Java_notepad();
+        Java_notepad jn = new Java_notepad();
     }
 }
