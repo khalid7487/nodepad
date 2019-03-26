@@ -20,7 +20,7 @@ public class Java_notepad extends JFrame {
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itemNew, itemOpen, itemSave, itmSaveas,
             itmExit, itmCopy, itmCut, itmPaste, itmFontColor,
-            itmFind, itmReplace;
+            itmFind, itmReplace,itmFont;
     JCheckBoxMenuItem wordWrap;
     String fileName;
     JFileChooser jc;
@@ -32,6 +32,7 @@ public class Java_notepad extends JFrame {
     int fnext = 1;
     // public  static Java_notepad frmMain=new Java_notepad();
 
+    FontHelper font;
     public Java_notepad() {
         initComponent();
         itemSave.addActionListener(new ActionListener() {
@@ -125,12 +126,32 @@ public class Java_notepad extends JFrame {
                 new FindandReplace(null, true);
             }
         });
+         itmFont.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               font.setVisible(true);
+            }
+        });
+         font.getOk().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               mainarea.setFont(font.font());
+               font.setVisible(false);
+            }
+        });
+         font.getCancel().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               font.setVisible(false);
+            }
+        });
     }
 
     private void initComponent() {
         jc = new JFileChooser(".");
         mainarea = new JTextArea();
         undo = new UndoManager();
+        font=new FontHelper();
         ImageIcon undoIcon = new ImageIcon(getClass().getResource("/img/Undo.png"));
         ImageIcon redoIcon = new ImageIcon(getClass().getResource("/img/Redo.png"));
         undoAction = new UndoAction(undoIcon);
@@ -163,6 +184,7 @@ public class Java_notepad extends JFrame {
         ImageIcon pasteIcon = new ImageIcon(getClass().getResource("/img/past.png"));
         ImageIcon findIcon = new ImageIcon(getClass().getResource("/img/find.png"));
         ImageIcon replaceIcon = new ImageIcon(getClass().getResource("/img/replace.png"));
+        ImageIcon fontIcon = new ImageIcon(getClass().getResource("/img/font.png"));
 
         //menuitem
         itemNew = new JMenuItem("New", newIcon);
@@ -176,6 +198,7 @@ public class Java_notepad extends JFrame {
         itmFind = new JMenuItem("Find ", findIcon);
         itmReplace = new JMenuItem("Replace ", replaceIcon);
         itmFontColor = new JMenuItem("Font Color");
+        itmFont=new JMenuItem("Font", fontIcon);
         wordWrap = new JCheckBoxMenuItem("Word Wrap");
 
         //adding shortcut
@@ -202,8 +225,10 @@ public class Java_notepad extends JFrame {
         mnuEdit.add(itmPaste);
         mnuEdit.add(itmFind);
         mnuEdit.add(itmReplace);
+        mnuEdit.add(itmFont);
         mnuFormat.add(wordWrap);
         mnuFormat.add(itmFontColor);
+        
 
         //add menu item to menu bar
         mbar.add(mnuFile);
