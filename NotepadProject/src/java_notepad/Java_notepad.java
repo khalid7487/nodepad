@@ -15,11 +15,12 @@ import javax.swing.undo.UndoManager;
 
 public class Java_notepad extends JFrame {
 
-    JTextArea mainarea;
+    static JTextArea mainarea;
     JMenuBar mbar;
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itemNew, itemOpen, itemSave, itmSaveas,
-            itmExit, itmCopy, itmCut, itmPaste,itmFontColor;
+            itmExit, itmCopy, itmCut, itmPaste, itmFontColor,
+            itmFind, itmReplace;
     JCheckBoxMenuItem wordWrap;
     String fileName;
     JFileChooser jc;
@@ -27,6 +28,9 @@ public class Java_notepad extends JFrame {
     UndoManager undo;
     UndoAction undoAction;
     RedoAction redoAction;
+    String findText;
+    int fnext=1;
+ //   public  static Java_notepad frmMain=new Java_notepad();
 
     public Java_notepad() {
         initComponent();
@@ -88,15 +92,15 @@ public class Java_notepad extends JFrame {
             }
         });
 
-      //  mainarea.setWrapStyleWord(true);
+        //  mainarea.setWrapStyleWord(true);
         wordWrap.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(wordWrap.isSelected()){
-                            mainarea.setLineWrap(true);
-                   mainarea.setWrapStyleWord(true);
-                }else{
-                            mainarea.setLineWrap(false);
+                if (wordWrap.isSelected()) {
+                    mainarea.setLineWrap(true);
+                    mainarea.setWrapStyleWord(true);
+                } else {
+                    mainarea.setLineWrap(false);
                     mainarea.setWrapStyleWord(false);
                 }
             }
@@ -104,9 +108,15 @@ public class Java_notepad extends JFrame {
         itmFontColor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Color c=JColorChooser.showDialog(rootPane, "Choose Font Color", Color.yellow);
+                Color c = JColorChooser.showDialog(rootPane, "Choose Font Color", Color.yellow);
                 mainarea.setForeground(c);
-                
+
+            }
+        });
+        itmFind.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new FindandReplace(null, false);
             }
         });
     }
@@ -139,6 +149,8 @@ public class Java_notepad extends JFrame {
         ImageIcon copyIcon = new ImageIcon(getClass().getResource("/img/copy.png"));
         ImageIcon cutIcon = new ImageIcon(getClass().getResource("/img/cut.png"));
         ImageIcon pasteIcon = new ImageIcon(getClass().getResource("/img/past.png"));
+        ImageIcon findIcon = new ImageIcon(getClass().getResource("/img/find.png"));
+        ImageIcon replaceIcon = new ImageIcon(getClass().getResource("/img/replace.png"));
 
         //menuitem
         itemNew = new JMenuItem("New", newIcon);
@@ -149,8 +161,11 @@ public class Java_notepad extends JFrame {
         itmCopy = new JMenuItem("Copy", copyIcon);
         itmCut = new JMenuItem("Cut", cutIcon);
         itmPaste = new JMenuItem("Paste", pasteIcon);
-        itmFontColor=new JMenuItem("Font Color");
-        wordWrap=new JCheckBoxMenuItem("Word Wrap");
+        itmFind = new JMenuItem("Find ", findIcon);
+        itmReplace = new JMenuItem("Replace ", replaceIcon);
+        itmFontColor = new JMenuItem("Font Color");
+        wordWrap = new JCheckBoxMenuItem("Word Wrap");
+
         //adding shortcut
         itemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
@@ -158,6 +173,8 @@ public class Java_notepad extends JFrame {
         itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
         itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
         itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
+     //   itmFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
+       // itmReplace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.CTRL_MASK));
 
         //add menu item
         mnuFile.add(itemNew);
@@ -171,9 +188,11 @@ public class Java_notepad extends JFrame {
         mnuEdit.add(itmCopy);
         mnuEdit.add(itmCut);
         mnuEdit.add(itmPaste);
+        mnuEdit.add(itmFind);
+        mnuEdit.add(itmReplace);
         mnuFormat.add(wordWrap);
         mnuFormat.add(itmFontColor);
-        
+
         //add menu item to menu bar
         mbar.add(mnuFile);
         mbar.add(mnuEdit);
@@ -314,7 +333,7 @@ public class Java_notepad extends JFrame {
             if (undo.canUndo()) {
                 setEnabled(true);
                 putValue(Action.NAME, "Undo");
-            }else{
+            } else {
                 setEnabled(false);
                 putValue(Action.NAME, "Undo");
             }
@@ -337,14 +356,14 @@ public class Java_notepad extends JFrame {
                 ex.printStackTrace();
             }
             update();
-             undoAction.update();
+            undoAction.update();
         }
 
         protected void update() {
             if (undo.canRedo()) {
                 setEnabled(true);
                 putValue(Action.NAME, "Redo");
-            }else{
+            } else {
                 setEnabled(false);
                 putValue(Action.NAME, "Redo");
             }
@@ -354,5 +373,8 @@ public class Java_notepad extends JFrame {
 
     public static void main(String[] args) {
         Java_notepad jn = new Java_notepad();
+    }
+    public static JTextArea getArea(){
+        return mainarea;
     }
 }
