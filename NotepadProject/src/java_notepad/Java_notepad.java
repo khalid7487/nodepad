@@ -20,7 +20,7 @@ public class Java_notepad extends JFrame {
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itemNew, itemOpen, itemSave, itmSaveas,
             itmExit, itmCopy, itmCut, itmPaste, itmFontColor,
-            itmFind, itmReplace,itmFont;
+            itmFind, itmReplace, itmFont;
     JCheckBoxMenuItem wordWrap;
     String fileName;
     JFileChooser jc;
@@ -33,6 +33,7 @@ public class Java_notepad extends JFrame {
     // public  static Java_notepad frmMain=new Java_notepad();
 
     FontHelper font;
+
     public Java_notepad() {
         initComponent();
         itemSave.addActionListener(new ActionListener() {
@@ -126,23 +127,23 @@ public class Java_notepad extends JFrame {
                 new FindandReplace(null, true);
             }
         });
-         itmFont.addActionListener(new ActionListener() {
+        itmFont.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               font.setVisible(true);
+                font.setVisible(true);
             }
         });
-         font.getOk().addActionListener(new ActionListener() {
+        font.getOk().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               mainarea.setFont(font.font());
-               font.setVisible(false);
+                mainarea.setFont(font.font());
+                font.setVisible(false);
             }
         });
-         font.getCancel().addActionListener(new ActionListener() {
+        font.getCancel().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               font.setVisible(false);
+                font.setVisible(false);
             }
         });
     }
@@ -151,7 +152,7 @@ public class Java_notepad extends JFrame {
         jc = new JFileChooser(".");
         mainarea = new JTextArea();
         undo = new UndoManager();
-        font=new FontHelper();
+        font = new FontHelper();
         ImageIcon undoIcon = new ImageIcon(getClass().getResource("/img/Undo.png"));
         ImageIcon redoIcon = new ImageIcon(getClass().getResource("/img/Redo.png"));
         undoAction = new UndoAction(undoIcon);
@@ -198,7 +199,7 @@ public class Java_notepad extends JFrame {
         itmFind = new JMenuItem("Find ", findIcon);
         itmReplace = new JMenuItem("Replace ", replaceIcon);
         itmFontColor = new JMenuItem("Font Color");
-        itmFont=new JMenuItem("Font", fontIcon);
+        itmFont = new JMenuItem("Font", fontIcon);
         wordWrap = new JCheckBoxMenuItem("Word Wrap");
 
         //adding shortcut
@@ -228,7 +229,6 @@ public class Java_notepad extends JFrame {
         mnuEdit.add(itmFont);
         mnuFormat.add(wordWrap);
         mnuFormat.add(itmFontColor);
-        
 
         //add menu item to menu bar
         mbar.add(mnuFile);
@@ -274,23 +274,43 @@ public class Java_notepad extends JFrame {
         try {
             retval = jc.showSaveDialog(this);
             if (retval == JFileChooser.APPROVE_OPTION) {
-                fout = new PrintWriter(new FileWriter(jc.getSelectedFile()));
+                if (jc.getSelectedFile().exists()) {
+                    int option = JOptionPane.showConfirmDialog(rootPane, "DO you want to"
+                            + " replace file?", "Confirmation", JOptionPane.OK_CANCEL_OPTION
+                    );
+                    if (option == 0) {
+                        String s = mainarea.getText();
+                        fout = new PrintWriter(new FileWriter(jc.getSelectedFile()));
+                        StringTokenizer st = new StringTokenizer(s, System.getProperty("line.separator"));
+                        while (st.hasMoreElements()) {
+                            fout.println(st.nextToken());
+                        }
+                        JOptionPane.showMessageDialog(rootPane, "File saved");
+                        fileContent = mainarea.getText();
+                        fileName = jc.getSelectedFile().getName();
+                        setTitle(fileName = jc.getSelectedFile().getName());
+                    } else {
+                        saveAs();
+                    }
+                } else {
+                    String s = mainarea.getText();
+                    fout = new PrintWriter(new FileWriter(jc.getSelectedFile()));
+                    StringTokenizer st = new StringTokenizer(s, System.getProperty("line.separator"));
+                    while (st.hasMoreElements()) {
+                        fout.println(st.nextToken());
+                    }
+                    JOptionPane.showMessageDialog(rootPane, "File saved");
+                    fileContent = mainarea.getText();
+                    fileName = jc.getSelectedFile().getName();
+                    setTitle(fileName = jc.getSelectedFile().getName());
+                }
             }
-
-            String s = mainarea.getText();
-            StringTokenizer st = new StringTokenizer(s, System.getProperty("line.separator"));
-            while (st.hasMoreElements()) {
-                fout.println(st.nextToken());
-            }
-            JOptionPane.showMessageDialog(rootPane, "File saved");
-            fileContent = mainarea.getText();
-            fileName = jc.getSelectedFile().getName();
-            setTitle(fileName = jc.getSelectedFile().getName());
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            fout.close();
+            if (fout != null) {
+                fout.close();
+            }
         }
 
     }
