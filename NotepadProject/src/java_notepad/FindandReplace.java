@@ -1,7 +1,11 @@
 package java_notepad;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -38,6 +42,7 @@ public class FindandReplace extends JDialog implements ActionListener {
         south = new JPanel();
         if (isReplace) {
             setTitle("Find and Replace");
+            setReplacePanel(north);
         } else {
             setTitle("Find");
             setFindPanel(north);
@@ -51,14 +56,18 @@ public class FindandReplace extends JDialog implements ActionListener {
                 dispose();
             }
         });
-        getContentPane().add(north,BorderLayout.NORTH);
-        getContentPane().add(center,BorderLayout.CENTER);
-        getContentPane().add(south,BorderLayout.SOUTH);
+        getContentPane().add(north, BorderLayout.NORTH);
+        getContentPane().add(center, BorderLayout.CENTER);
+        getContentPane().add(south, BorderLayout.SOUTH);
         pack();
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
+        final Toolkit toolkit = Toolkit.getDefaultToolkit();
+        final Dimension screenSize = toolkit.getScreenSize();
+        final int x = (screenSize.width - getWidth()) / 2;
+        final int y = (screenSize.height - getHeight()) / 2;
+        setLocation(x, y);
         setVisible(true);
-
     }
 
     private void addComponent(JPanel center) {
@@ -106,23 +115,73 @@ public class FindandReplace extends JDialog implements ActionListener {
         north.add(NEXT);
     }
 
-    private void setFindAndReplace() {
+    private void setReplacePanel(JPanel north) {
+        GridBagLayout grid = new GridBagLayout();
+        north.setLayout(grid);
+        GridBagConstraints con = new GridBagConstraints();
+        con.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblFword = new JLabel("Find Word: ");
+        JLabel lblRword = new JLabel("Replace Word: ");
+        final JButton NEXT = new JButton("Replace Text");
+        NEXT.addActionListener(this);
+        NEXT.setEnabled(false);
+        final JButton REPLACE = new JButton("Replace All");
+        REPLACE.addActionListener(this);
+        REPLACE.setEnabled(false);
+        searchText = new JTextField(20);
+        replaceText = new JTextField(20);
+        replaceText.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                boolean state = (replaceText.getDocument().getLength() > 0);
+                NEXT.setEnabled(state);
+                REPLACE.setEnabled(state);
+                foundOne = false;
+            }
 
+        });
+        con.gridx = 0;
+        con.gridy = 0;
+        grid.setConstraints(lblFword, con);
+        north.add(lblFword);
+        con.gridx = 1;
+        con.gridy = 0;
+        grid.setConstraints(searchText, con);
+        north.add(searchText);
+        con.gridx = 2;
+        con.gridy = 0;
+        grid.setConstraints(NEXT, con);
+        north.add(NEXT);
+        con.gridx = 0;
+        con.gridy = 1;
+        grid.setConstraints(lblRword, con);
+        north.add(lblRword);
+        con.gridx = 1;
+        con.gridy = 1;
+        grid.setConstraints(replaceText, con);
+        north.add(replaceText);
+        con.gridx = 2;
+        con.gridy = 1;
+        grid.setConstraints(REPLACE, con);
+        north.add(REPLACE);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource().equals(replaceText)) {
+        if (e.getSource().equals(searchText) || e.getSource().equals(replaceText)) {
             validate();
         }
         process();
+        if(e.getActionCommand().equals("Replace All")){
+            replaceAll();
+        }
     }
 
     private void process() {
         if (isReplace) {
-            statusInfo.setText("Replacing" + searchText.getText());
+            statusInfo.setText("Replacing " + searchText.getText());
         } else {
-            statusInfo.setText("Searching for" + searchText.getText());
+            statusInfo.setText("Searching for " + searchText.getText());
         }
         int caret = Java_notepad.getArea().getCaretPosition();
         String word = getWord();
@@ -136,7 +195,13 @@ public class FindandReplace extends JDialog implements ActionListener {
     private void endResult(boolean isReplaceAll, int tally) {
         String message = "";
         if (isReplaceAll) {
-
+            if (tally == 0) {
+                message = searchText.getText() + " not found";
+            } else if (tally == 1) {
+                message = "One change was made to " + searchText.getText();
+            } else {
+                message =""+tally+" changes were made to " + searchText.getText();
+            }
         } else {
             String str = "";
             if (isSearchDown()) {
@@ -145,9 +210,9 @@ public class FindandReplace extends JDialog implements ActionListener {
                 str = "Search Up";
             }
             if (foundOne && !isReplace) {
-                message = "End of " + str + "for  " + searchText.getText();
+                message = "End of " + str + "  for  " + searchText.getText();
             } else if (foundOne && isReplace) {
-                message = "End of Replace " + searchText.getText() + " with " + replaceText.getText();
+                message = "End of Replace " + searchText.getText() + "  with  " + replaceText.getText();
             }
         }
         statusInfo.setText(message);
@@ -205,6 +270,18 @@ public class FindandReplace extends JDialog implements ActionListener {
             } else {
                 Java_notepad.getArea().select(caret - check, caret);
             }
+
+            //for replace
+            if (isReplace) {
+                String replace = replaceText.getText();
+                Java_notepad.getArea().replaceSelection(replace);
+                if (isSearchDown()) {
+                    Java_notepad.getArea().select(caret, caret + replace.length());
+                } else {
+                    Java_notepad.getArea().select(caret - replace.length(), caret);
+                }
+            }
+
             foundOne = true;
             return caret;
         }
@@ -244,5 +321,26 @@ public class FindandReplace extends JDialog implements ActionListener {
             return true;
         }
         return ((!Character.isLetterOrDigit(text.charAt(offsetLeft))) && (!Character.isLetterOrDigit(text.charAt(offsetRight))));
+    }
+
+    private void replaceAll() {
+        String word = searchText.getText();
+        String text = Java_notepad.getArea().getText();
+        String insert = replaceText.getText();
+        StringBuffer sb = new StringBuffer(text);
+        int diff = insert.length() - word.length();
+        int offset = 0;
+        int tally = 0;
+        for (int i = 0; i < (text.length() - word.length()); i++) {
+            String temp = text.substring(i, i + word.length());
+            if ((temp.equals(word) && checkForWholeWord(word.length(), text, 0, i))) {
+                tally++;
+                sb.replace(i + offset, i+offset + word.length(), insert);
+                offset += diff;
+            }
+        }
+        Java_notepad.getArea().setText(sb.toString());
+        endResult(true, tally);
+        Java_notepad.getArea().setCaretPosition(0);
     }
 }

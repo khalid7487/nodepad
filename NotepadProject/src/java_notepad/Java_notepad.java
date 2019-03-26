@@ -29,8 +29,8 @@ public class Java_notepad extends JFrame {
     UndoAction undoAction;
     RedoAction redoAction;
     String findText;
-    int fnext=1;
- //   public  static Java_notepad frmMain=new Java_notepad();
+    int fnext = 1;
+    // public  static Java_notepad frmMain=new Java_notepad();
 
     public Java_notepad() {
         initComponent();
@@ -119,6 +119,12 @@ public class Java_notepad extends JFrame {
                 new FindandReplace(null, false);
             }
         });
+        itmReplace.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new FindandReplace(null, true);
+            }
+        });
     }
 
     private void initComponent() {
@@ -133,7 +139,13 @@ public class Java_notepad extends JFrame {
         getContentPane().add(new JScrollPane(mainarea), BorderLayout.CENTER);
         setTitle("Untitled NotePad");
         setSize(800, 600);
-        //menubar
+        final Toolkit toolkit = Toolkit.getDefaultToolkit();
+        final Dimension screenSize = toolkit.getScreenSize();
+        final int x = (screenSize.width - getWidth()) / 2;
+        final int y = (screenSize.height - getHeight()) / 2;
+        setLocation(x, y);
+        //       setVisible(true);
+//menubar
         mbar = new JMenuBar();
         //menu
         mnuFile = new JMenu("File");
@@ -173,8 +185,8 @@ public class Java_notepad extends JFrame {
         itmCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
         itmCut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK));
         itmPaste.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
-     //   itmFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
-       // itmReplace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.CTRL_MASK));
+        //   itmFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
+        // itmReplace.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.CTRL_MASK));
 
         //add menu item
         mnuFile.add(itemNew);
@@ -374,7 +386,8 @@ public class Java_notepad extends JFrame {
     public static void main(String[] args) {
         Java_notepad jn = new Java_notepad();
     }
-    public static JTextArea getArea(){
+
+    public static JTextArea getArea() {
         return mainarea;
     }
 }
