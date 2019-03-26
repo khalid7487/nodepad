@@ -19,7 +19,8 @@ public class Java_notepad extends JFrame {
     JMenuBar mbar;
     JMenu mnuFile, mnuEdit, mnuFormat, mnuHelp;
     JMenuItem itemNew, itemOpen, itemSave, itmSaveas,
-            itmExit, itmCopy, itmCut, itmPaste;
+            itmExit, itmCopy, itmCut, itmPaste,itmFontColor;
+    JCheckBoxMenuItem wordWrap;
     String fileName;
     JFileChooser jc;
     String fileContent;
@@ -86,6 +87,28 @@ public class Java_notepad extends JFrame {
                 redoAction.update();
             }
         });
+
+      //  mainarea.setWrapStyleWord(true);
+        wordWrap.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(wordWrap.isSelected()){
+                            mainarea.setLineWrap(true);
+                   mainarea.setWrapStyleWord(true);
+                }else{
+                            mainarea.setLineWrap(false);
+                    mainarea.setWrapStyleWord(false);
+                }
+            }
+        });
+        itmFontColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color c=JColorChooser.showDialog(rootPane, "Choose Font Color", Color.yellow);
+                mainarea.setForeground(c);
+                
+            }
+        });
     }
 
     private void initComponent() {
@@ -126,6 +149,8 @@ public class Java_notepad extends JFrame {
         itmCopy = new JMenuItem("Copy", copyIcon);
         itmCut = new JMenuItem("Cut", cutIcon);
         itmPaste = new JMenuItem("Paste", pasteIcon);
+        itmFontColor=new JMenuItem("Font Color");
+        wordWrap=new JCheckBoxMenuItem("Word Wrap");
         //adding shortcut
         itemNew.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         itemOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
@@ -146,6 +171,8 @@ public class Java_notepad extends JFrame {
         mnuEdit.add(itmCopy);
         mnuEdit.add(itmCut);
         mnuEdit.add(itmPaste);
+        mnuFormat.add(wordWrap);
+        mnuFormat.add(itmFontColor);
         
         //add menu item to menu bar
         mbar.add(mnuFile);
