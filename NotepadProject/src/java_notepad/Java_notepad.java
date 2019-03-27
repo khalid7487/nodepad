@@ -21,6 +21,7 @@ public class Java_notepad extends JFrame {
     JMenuItem itemNew, itemOpen, itemSave, itmSaveas,
             itmExit, itmCopy, itmCut, itmPaste, itmFontColor,
             itmFind, itmReplace, itmFont;
+    JButton btnopen;
     JCheckBoxMenuItem wordWrap;
     String fileName;
     JFileChooser jc;
@@ -31,8 +32,8 @@ public class Java_notepad extends JFrame {
     String findText;
     int fnext = 1;
     // public  static Java_notepad frmMain=new Java_notepad();
-
     FontHelper font;
+    JToolBar toolbar;
 
     public Java_notepad() {
         initComponent();
@@ -49,6 +50,12 @@ public class Java_notepad extends JFrame {
             }
         });
         itemOpen.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                open();
+            }
+        });
+        btnopen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 open();
@@ -153,6 +160,9 @@ public class Java_notepad extends JFrame {
         mainarea = new JTextArea();
         undo = new UndoManager();
         font = new FontHelper();
+        toolbar = new JToolBar();
+
+        getContentPane().add(toolbar, BorderLayout.NORTH);
         ImageIcon undoIcon = new ImageIcon(getClass().getResource("/img/Undo.png"));
         ImageIcon redoIcon = new ImageIcon(getClass().getResource("/img/Redo.png"));
         undoAction = new UndoAction(undoIcon);
@@ -187,6 +197,8 @@ public class Java_notepad extends JFrame {
         ImageIcon replaceIcon = new ImageIcon(getClass().getResource("/img/replace.png"));
         ImageIcon fontIcon = new ImageIcon(getClass().getResource("/img/font.png"));
 
+        btnopen = new JButton(openIcon);
+        toolbar.add(btnopen);
         //menuitem
         itemNew = new JMenuItem("New", newIcon);
         itemOpen = new JMenuItem("Open", openIcon);
@@ -326,9 +338,10 @@ public class Java_notepad extends JFrame {
                 while ((nch = in.read(buff, 0, buff.length)) != -1) {
                     mainarea.append(new String(buff, 0, nch));
                 }
+                fileName = jc.getSelectedFile().getName();
+                setTitle(fileName = jc.getSelectedFile().getName());
             }
-            fileName = jc.getSelectedFile().getName();
-            setTitle(fileName = jc.getSelectedFile().getName());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
